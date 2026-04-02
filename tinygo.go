@@ -19,6 +19,10 @@ type config struct {
 	logger     func(string)
 	lookPath   func(string) (string, error)
 	httpClient *http.Client
+	goos       string
+	goarch     string
+	// for testing
+	downloadURLFunc func() string
 }
 
 type Option func(*config)
@@ -49,6 +53,8 @@ func newConfig(opts ...Option) *config {
 		logger:     func(string) {},
 		lookPath:   exec.LookPath,
 		httpClient: http.DefaultClient,
+		goos:       runtime.GOOS,
+		goarch:     runtime.GOARCH,
 	}
 	for _, opt := range opts {
 		opt(c)
@@ -69,20 +75,41 @@ func withHTTPClient(cl *http.Client) Option {
 	}
 }
 
+func withGOOS(goos string) Option {
+	return func(c *config) {
+		c.goos = goos
+	}
+}
+
+func withGOARCH(goarch string) Option {
+	return func(c *config) {
+		c.goarch = goarch
+	}
+}
+
+func withDownloadURLFunc(f func() string) Option {
+	return func(c *config) {
+		c.downloadURLFunc = f
+	}
+}
+
 func (c *config) binPath() string {
 	bin := filepath.Join(c.installDir, "tinygo", "bin", "tinygo")
-	if runtime.GOOS == "windows" {
+	if c.goos == "windows" {
 		bin += ".exe"
 	}
 	return bin
 }
 
 func (c *config) downloadURL() string {
+	if c.downloadURLFunc != nil {
+		return c.downloadURLFunc()
+	}
 	ext := "tar.gz"
-	if runtime.GOOS == "windows" {
+	if c.goos == "windows" {
 		ext = "zip"
 	}
 	// eg: tinygo0.40.1.linux-amd64.tar.gz
 	return "https://github.com/tinygo-org/tinygo/releases/download/v" +
-		c.version + "/tinygo" + c.version + "." + runtime.GOOS + "-" + runtime.GOARCH + "." + ext
+		c.version + "/tinygo" + c.version + "." + c.goos + "-" + c.goarch + "." + ext
 }
