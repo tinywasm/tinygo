@@ -42,5 +42,14 @@ func Install(opts ...Option) error {
 		return fmt.Errorf("tinygo binary not found after extraction: %w", err)
 	}
 
+	// Double check by running "version"
+	ver, err := GetVersion(opts...)
+	if err != nil {
+		// cleanup partial install if verification fails
+		os.RemoveAll(filepath.Join(c.installDir, "tinygo"))
+		return fmt.Errorf("tinygo verification failed: %w", err)
+	}
+	c.logger("TinyGo verified: " + ver)
+
 	return nil
 }

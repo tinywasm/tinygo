@@ -5,7 +5,7 @@ Establish the base structures of the package: configuration, functional options,
 
 ### Steps
 
-- [ ] Create `tinygo.go` with:
+- [x] Create `tinygo.go` with:
   - Constant `DefaultVersion = "0.40.1"`
   - Constant `DefaultInstallDir = ".tinywasm"` (relative to home)
   - Struct `config` (private): `version string`, `installDir string`, `logger func(string)`

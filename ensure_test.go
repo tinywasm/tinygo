@@ -17,7 +17,9 @@ func TestEnsureInstalled(t *testing.T) {
 	defer os.Remove(archiveFile.Name())
 	gw := gzip.NewWriter(archiveFile)
 	tw := tar.NewWriter(gw)
-	tw.WriteHeader(&tar.Header{Name: "tinygo/bin/tinygo", Mode: 0755, Size: 0})
+	mockBody := "#!/bin/bash\necho \"tinygo version 0.40.1 linux/amd64\"\n"
+	tw.WriteHeader(&tar.Header{Name: "tinygo/bin/tinygo", Mode: 0755, Size: int64(len(mockBody))})
+	tw.Write([]byte(mockBody))
 	tw.Close()
 	gw.Close()
 	archiveFile.Close()

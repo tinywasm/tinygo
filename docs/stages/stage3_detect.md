@@ -8,7 +8,7 @@ Implement TinyGo binary detection functions and the main orchestrator `EnsureIns
 
 ### Steps
 
-- [ ] Create `detect.go` with:
+- [x] Create `detect.go` with:
   - `IsInstalled() bool` — returns true if tinygo is available (PATH or local).
     - First looks in `PATH` with `exec.LookPath("tinygo")`.
     - Then looks in local path `~/.tinywasm/tinygo/bin/tinygo[.exe]`.
@@ -19,13 +19,13 @@ Implement TinyGo binary detection functions and the main orchestrator `EnsureIns
     - Uses `GetPath()` to find the binary.
     - Executes the command and parses output.
 
-- [ ] Create `ensure.go` with:
+- [x] Create `ensure.go` with:
   - `EnsureInstalled(opts ...Option) (string, error)` — main function.
     - If `GetPath()` finds the binary, returns the path directly.
     - If not, calls `Install(opts...)` and then `GetPath()`.
     - Returns the path to the binary ready for use.
 
-- [ ] Create `detect_test.go` with:
+- [x] Create `detect_test.go` with:
   - `IsInstalled` returns true when `withLookPath` finds tinygo in PATH.
   - `IsInstalled` returns true when binary exists at local `binPath()` (create fake binary in temp dir).
   - `IsInstalled` returns false when both PATH and local are missing.
@@ -34,7 +34,7 @@ Implement TinyGo binary detection functions and the main orchestrator `EnsureIns
   - `GetPath` returns error when not found anywhere.
   - `GetVersion` executes real `tinygo version` if available (skip if not installed).
 
-- [ ] Create `ensure_test.go` with:
+- [x] Create `ensure_test.go` with:
   - `EnsureInstalled` returns existing path without calling Install (mock lookPath to succeed).
   - `EnsureInstalled` triggers Install when not found (use `httptest.Server` + `withLookPath` that fails).
 
