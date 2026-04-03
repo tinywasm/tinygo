@@ -22,6 +22,7 @@ type config struct {
 	goos       string
 	goarch     string
 	// for testing
+	environ         []string
 	downloadURLFunc func() string
 }
 
@@ -55,6 +56,7 @@ func newConfig(opts ...Option) *config {
 		httpClient: http.DefaultClient,
 		goos:       runtime.GOOS,
 		goarch:     runtime.GOARCH,
+		environ:    os.Environ(),
 	}
 	for _, opt := range opts {
 		opt(c)
@@ -84,6 +86,12 @@ func withGOOS(goos string) Option {
 func withGOARCH(goarch string) Option {
 	return func(c *config) {
 		c.goarch = goarch
+	}
+}
+
+func withEnviron(environ []string) Option {
+	return func(c *config) {
+		c.environ = environ
 	}
 }
 
