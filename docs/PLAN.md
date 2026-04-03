@@ -57,5 +57,5 @@ os.Setenv("PATH", newPath)  // ← BUG: wrong approach, fixed by Stage 5
 
 | Stage | Description | Dependency | Completed |
 |-------|-------------|-------------|-----------|
-| 4 | [env.go: GetRoot, GetEnv](stages/stage4_env.md) | Stage 3 | [ ] |
+| 4 | [env.go: GetRoot, GetEnv](stages/stage4_env.md) | Stage 3 | [x] |
 | 5 | [Fix wasmbuild.go: use GetEnv() instead of os.Setenv](stages/stage5_wasmbuild_fix.md) | Stage 4 | [ ] |
