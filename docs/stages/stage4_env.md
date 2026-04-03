@@ -17,7 +17,7 @@ compiler support files. Consumers (e.g. `gobuild`) must inject this into any
 
 ### Steps
 
-- [ ] Create `env.go` with:
+- [x] Create `env.go` with:
   - `GetRoot(opts ...Option) string`
     - Builds config from opts.
     - If tinygo is found in PATH (`lookPath` succeeds) → returns `""` (system install, user controls env).
@@ -31,7 +31,7 @@ compiler support files. Consumers (e.g. `gobuild`) must inject this into any
       - Prepends `{root}/bin` to the `PATH` entry.
       - Returns the modified slice.
 
-- [ ] Create `env_test.go` with:
+- [x] Create `env_test.go` with:
   - `TestGetRoot_SystemInstall` — mock `withLookPath` to succeed → assert returns `""`.
   - `TestGetRoot_LocalInstall` — mock `withLookPath` to fail, set `WithInstallDir(tmpDir)` → assert returns `filepath.Join(tmpDir, "tinygo")`.
   - `TestGetEnv_SystemInstall` — mock lookPath to succeed → assert returned env equals `os.Environ()`.
