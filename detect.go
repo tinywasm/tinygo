@@ -45,3 +45,18 @@ func GetVersion(opts ...Option) (string, error) {
 
 	return strings.TrimSpace(string(out)), nil
 }
+
+// installedVersion returns just the semver number from `tinygo version` output.
+// e.g. "tinygo version 0.39.0 linux/amd64 ..." → "0.39.0"
+func installedVersion(opts ...Option) (string, error) {
+	full, err := GetVersion(opts...)
+	if err != nil {
+		return "", err
+	}
+	// output format: "tinygo version X.Y.Z ..."
+	fields := strings.Fields(full)
+	if len(fields) < 3 {
+		return "", fmt.Errorf("unexpected tinygo version output: %q", full)
+	}
+	return fields[2], nil
+}

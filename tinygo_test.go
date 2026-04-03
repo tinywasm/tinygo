@@ -2,8 +2,8 @@ package tinygo
 
 import (
 	"net/http"
-	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -13,8 +13,7 @@ func TestNewConfig(t *testing.T) {
 		t.Errorf("expected version %s, got %s", DefaultVersion, c.version)
 	}
 
-	homeDir, _ := os.UserHomeDir()
-	expectedDir := filepath.Join(homeDir, DefaultInstallDir)
+	expectedDir := defaultInstallDir(runtime.GOOS)
 	if c.installDir != expectedDir {
 		t.Errorf("expected installDir %s, got %s", expectedDir, c.installDir)
 	}

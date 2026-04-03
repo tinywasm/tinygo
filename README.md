@@ -1,4 +1,5 @@
 # tinygo
+<img src="docs/img/badges.svg">
 
 Automated TinyGo installer for the `tinywasm` ecosystem. This package provides a standalone, cross-platform (Linux, macOS, Windows) solution to manage TinyGo installations without requiring administrator privileges or user interaction.
 

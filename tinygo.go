@@ -2,16 +2,25 @@ package tinygo
 
 import (
 	"net/http"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 )
 
-const (
-	DefaultVersion    = "0.40.1"
-	DefaultInstallDir = ".tinywasm"
-)
+const DefaultVersion = "0.40.1"
+
+// defaultInstallDir returns the platform-specific install directory,
+// matching the official TinyGo installation instructions at
+// https://tinygo.org/getting-started/install/
+//
+//   - Linux/macOS: /usr/local  (tar -xf tinygo...tar.gz -C /usr/local)
+//   - Windows:     "" (Scoop manages its own directories; no fixed path)
+func defaultInstallDir(goos string) string {
+	if goos == "windows" {
+		return ""
+	}
+	return "/usr/local"
+}
 
 type config struct {
 	version    string
@@ -46,10 +55,9 @@ func WithLogger(f func(string)) Option {
 }
 
 func newConfig(opts ...Option) *config {
-	homeDir, _ := os.UserHomeDir()
 	c := &config{
 		version:    DefaultVersion,
-		installDir: filepath.Join(homeDir, DefaultInstallDir),
+		installDir: defaultInstallDir(runtime.GOOS),
 		logger:     func(string) {},
 		lookPath:   exec.LookPath,
 		httpClient: http.DefaultClient,
