@@ -157,6 +157,13 @@ func ensureScoop(c *config) error {
 		return fmt.Errorf("failed to install Scoop: %w\n%s", err, out)
 	}
 
+	// Scoop installs to %USERPROFILE%\scoop\shims which is not in the current
+	// process PATH. Prepend it so lookPath can find scoop without a new shell.
+	if home, err := os.UserHomeDir(); err == nil {
+		scoopShims := filepath.Join(home, "scoop", "shims")
+		os.Setenv("PATH", scoopShims+string(os.PathListSeparator)+os.Getenv("PATH"))
+	}
+
 	if _, err := c.lookPath("scoop"); err != nil {
 		return fmt.Errorf("scoop not found after installation; restart your shell and retry")
 	}
