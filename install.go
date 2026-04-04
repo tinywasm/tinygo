@@ -81,12 +81,13 @@ func installUnix(c *config, opts ...Option) error {
 // If Scoop is not installed, it installs it first using the official
 // PowerShell one-liner, then runs `scoop install tinygo`.
 func installWindows(c *config, opts ...Option) error {
-	if err := ensureScoop(c); err != nil {
+	scoopCmd, err := ensureScoop(c)
+	if err != nil {
 		return err
 	}
 
 	c.logger("Installing TinyGo via scoop...")
-	if out, err := exec.Command("scoop", "install", "tinygo").CombinedOutput(); err != nil {
+	if out, err := exec.Command("cmd", "/C", scoopCmd, "install", "tinygo").CombinedOutput(); err != nil {
 		return fmt.Errorf("scoop install tinygo: %w\n%s", err, out)
 	}
 
@@ -108,9 +109,9 @@ func installWindows(c *config, opts ...Option) error {
 func removeExisting(c *config, binPath string) error {
 	switch c.goos {
 	case "windows":
-		if _, err := c.lookPath("scoop"); err == nil {
+		if scoopCmd, err := ensureScoop(c); err == nil {
 			c.logger("Removing old TinyGo via scoop...")
-			if out, err := exec.Command("scoop", "uninstall", "tinygo").CombinedOutput(); err != nil {
+			if out, err := exec.Command("cmd", "/C", scoopCmd, "uninstall", "tinygo").CombinedOutput(); err != nil {
 				return fmt.Errorf("scoop uninstall tinygo: %w\n%s", err, out)
 			}
 		}
@@ -141,10 +142,18 @@ func removeExisting(c *config, binPath string) error {
 	}
 }
 
-// ensureScoop installs Scoop if it is not already available in PATH.
-func ensureScoop(c *config) error {
-	if _, err := c.lookPath("scoop"); err == nil {
-		return nil
+// ensureScoop installs Scoop if not already present and returns the absolute
+// path to scoop.cmd. Uses absolute path because exec.LookPath on Windows only
+// finds .exe, not .cmd, and Scoop shims may not be in PATH mid-process.
+func ensureScoop(c *config) (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("cannot determine user home dir: %w", err)
+	}
+	scoopCmd := filepath.Join(home, "scoop", "shims", "scoop.cmd")
+
+	if _, err := os.Stat(scoopCmd); err == nil {
+		return scoopCmd, nil // already installed
 	}
 
 	c.logger("Scoop not found. Installing Scoop...")
@@ -154,20 +163,12 @@ func ensureScoop(c *config) error {
 		`Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression`
 
 	if out, err := exec.Command("powershell", "-NoProfile", "-Command", script).CombinedOutput(); err != nil {
-		return fmt.Errorf("failed to install Scoop: %w\n%s", err, out)
+		return "", fmt.Errorf("failed to install Scoop: %w\n%s", err, out)
 	}
 
-	// Scoop installs to %USERPROFILE%\scoop\shims which is not in the current
-	// process PATH. Prepend it so lookPath can find scoop without a new shell.
-	if home, err := os.UserHomeDir(); err == nil {
-		scoopShims := filepath.Join(home, "scoop", "shims")
-		os.Setenv("PATH", scoopShims+string(os.PathListSeparator)+os.Getenv("PATH"))
+	if _, err := os.Stat(scoopCmd); err != nil {
+		return "", fmt.Errorf("scoop not found at %s after installation: %w", scoopCmd, err)
 	}
-
-	if _, err := c.lookPath("scoop"); err != nil {
-		return fmt.Errorf("scoop not found after installation; restart your shell and retry")
-	}
-
-	c.logger("Scoop installed.")
-	return nil
+	c.logger("Scoop installed at " + scoopCmd)
+	return scoopCmd, nil
 }
