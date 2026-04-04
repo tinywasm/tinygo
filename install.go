@@ -159,10 +159,12 @@ func ensureScoop(c *config) (string, error) {
 	c.logger("Scoop not found. Installing Scoop...")
 
 	// Official Scoop install: https://scoop.sh
-	// Use -ErrorAction Stop so PowerShell failures propagate as non-zero exit codes.
+	// Download and run with -RunAsAdmin to allow installation in elevated sessions (e.g. SSH).
 	script := `$ErrorActionPreference = 'Stop'; ` +
 		`Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force; ` +
-		`Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression`
+		`$tmp = Join-Path $env:TEMP 'scoop-install.ps1'; ` +
+		`Invoke-RestMethod -Uri https://get.scoop.sh -OutFile $tmp; ` +
+		`& $tmp -RunAsAdmin`
 
 	out, err := exec.Command("powershell", "-NoProfile", "-Command", script).CombinedOutput()
 	c.logger("Scoop install output: " + string(out))
