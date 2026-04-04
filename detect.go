@@ -22,7 +22,16 @@ func getPath(c *config) (string, error) {
 		return p, nil
 	}
 
-	// 2. local
+	// 2. Scoop shims (Windows: scoop install tinygo places tinygo.exe here,
+	// but shims dir may not be in PATH within the current process)
+	if home, err := os.UserHomeDir(); err == nil {
+		scoopBin := home + `\scoop\shims\tinygo.exe`
+		if _, err := os.Stat(scoopBin); err == nil {
+			return scoopBin, nil
+		}
+	}
+
+	// 3. local tarball install
 	bin := c.binPath()
 	if _, err := os.Stat(bin); err == nil {
 		return bin, nil
