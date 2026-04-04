@@ -159,10 +159,14 @@ func ensureScoop(c *config) (string, error) {
 	c.logger("Scoop not found. Installing Scoop...")
 
 	// Official Scoop install: https://scoop.sh
-	script := `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser; ` +
+	// Use -ErrorAction Stop so PowerShell failures propagate as non-zero exit codes.
+	script := `$ErrorActionPreference = 'Stop'; ` +
+		`Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force; ` +
 		`Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression`
 
-	if out, err := exec.Command("powershell", "-NoProfile", "-Command", script).CombinedOutput(); err != nil {
+	out, err := exec.Command("powershell", "-NoProfile", "-Command", script).CombinedOutput()
+	c.logger("Scoop install output: " + string(out))
+	if err != nil {
 		return "", fmt.Errorf("failed to install Scoop: %w\n%s", err, out)
 	}
 
